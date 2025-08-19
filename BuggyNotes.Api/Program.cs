@@ -13,7 +13,10 @@ using Microsoft.AspNetCore.Routing;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtOptions = new JwtOptions();
+var jwtOptions = new JwtOptions
+{
+    Secret = builder.Configuration["Jwt:Secret"] ?? throw new Exception("Missing Jwt:Secret")
+};
 
 builder.Services
   .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
