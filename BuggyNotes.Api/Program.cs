@@ -77,13 +77,12 @@ app.MapPost("/seed", async (AppDb db) =>
     return Results.Ok(new { seeded = true });
 });
 
-app.MapGet("/notes", async (AppDb db) =>
+app.MapGet("/notes", async (AppDb db, ClaimsPrincipal user) =>
 {
-    log.LogInformation("GET /notes");
-    var list = await db.Notes.ToListAsync();
-    log.LogInformation("Returned {Count} notes", list.Count);
+    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    var list = await db.Notes.Where(n => n.OwnerId == userId).ToListAsync();
     return list;
-});
+}).RequireAuthorization();
 
 app.MapGet("/notes/search-bug", async (AppDb db, string q) =>
 {
