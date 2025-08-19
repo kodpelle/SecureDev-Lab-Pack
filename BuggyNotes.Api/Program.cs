@@ -13,9 +13,21 @@ using Microsoft.AspNetCore.Routing;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var insecure = builder.Configuration.GetValue<bool>("Demo:InsecureMode");
+
+var secret = builder.Configuration["Jwt:Secret"];
+if (string.IsNullOrWhiteSpace(secret))
+{
+    secret = "THIS_IS_WEAK_AND_FOR_DEMO_ONLY_CHANGE_ME";
+    Console.WriteLine("[WARN] Jwt:Secret missing – using DEV fallback.");
+}
+
 var jwtOptions = new JwtOptions
 {
-    Secret = builder.Configuration["Jwt:Secret"] ?? throw new Exception("Missing Jwt:Secret")
+    Secret = secret!,
+    Issuer = "BuggyNotes",
+    Audience = "BuggyNotesAudience",
+    ExpiryMinutes = 15
 };
 
 builder.Services
@@ -30,7 +42,8 @@ builder.Services
           ValidateIssuerSigningKey = true,
           ValidIssuer = jwtOptions.Issuer,
           ValidAudience = jwtOptions.Audience,
-          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret))
+          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+          ClockSkew = TimeSpan.FromSeconds(30)
       };
   });
 
@@ -50,6 +63,13 @@ builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 
 var app = builder.Build();
+
+app.Use(async (ctx, next) =>
+{
+    ctx.Response.Headers["X-Demo-Mode"] = insecure ? "insecure" : "secure";
+    await next();
+});
+
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -77,12 +97,40 @@ app.MapPost("/seed", async (AppDb db) =>
     return Results.Ok(new { seeded = true });
 });
 
-app.MapGet("/notes", async (AppDb db, ClaimsPrincipal user) =>
+app.MapPost("/notes", async (AppDb db, ClaimsPrincipal user, Note note) =>
 {
-    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier)!;
-    var list = await db.Notes.Where(n => n.OwnerId == userId).ToListAsync();
-    return list;
+    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (userId is null) return Results.Unauthorized();
+
+    note.OwnerId = userId;
+    db.Notes.Add(note);
+    await db.SaveChangesAsync();
+    return Results.Created($"/notes/{note.Id}", note);
 }).RequireAuthorization();
+
+app.MapPost("/notes-bug", async (AppDb db, Note note) =>
+{
+    //accepterar godtycklig OwnerId från klienten
+    db.Notes.Add(note);
+    await db.SaveChangesAsync();
+    return Results.Created($"/notes/{note.Id}", note);
+});
+
+app.MapGet("/notes/{id:int}", async (AppDb db, ClaimsPrincipal user, int id) =>
+{
+    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (userId is null) return Results.Unauthorized();
+
+    var note = await db.Notes.FirstOrDefaultAsync(n => n.Id == id && n.OwnerId == userId);
+    return note is null ? Results.NotFound() : Results.Ok(note);
+}).RequireAuthorization();
+
+app.MapGet("/notes/{id:int}-bug", async (AppDb db, int id) =>
+{
+    //vem som helst kan läsa vilken note som helst
+    var note = await db.Notes.FindAsync(id);
+    return note is null ? Results.NotFound() : Results.Ok(note);
+});
 
 app.MapGet("/notes/search-bug", async (AppDb db, string q) =>
 {
@@ -126,6 +174,16 @@ app.MapPost("/auth/register", async (AppDb db, RegisterDto dto) =>
         user.UserName,
         message = "User registered successfully"
     });
+});
+
+app.MapPost("/auth/login-bug", async (AppDb db, LoginDto dto) =>
+{
+    // varken hash- eller lösenordsverifiering, kräver bara att användaren finns
+    var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
+    if (user is null) return Results.Unauthorized();
+
+    var token = JwtIssuer.CreateToken(user.Id.ToString(), user.UserName, jwtOptions);
+    return Results.Ok(new { token, note = "BUG: password was not verified" });
 });
 app.MapPost("/auth/login", async (AppDb db, LoginDto dto) =>
 {
