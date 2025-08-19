@@ -1,8 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using BuggyNotes.Api.Data;
 using BuggyNotes.Api.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using BuggyNotes.Api.Auth;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+var jwtOptions = new JwtOptions();
 
 builder.Services.AddDbContext<AppDb>(options =>
     options
@@ -11,12 +18,34 @@ builder.Services.AddDbContext<AppDb>(options =>
         .EnableSensitiveDataLogging() // DEV ONLY: visar parameter-värden i logg
 );
 
+builder.Services
+  .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  .AddJwtBearer(o =>
+  {
+      o.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidateLifetime = true,
+          ValidateIssuerSigningKey = true,
+          ValidIssuer = jwtOptions.Issuer,
+          ValidAudience = jwtOptions.Audience,
+          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret))
+      };
+  });
+
+builder.Services.AddAuthorization();
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 var log = app.Services.GetRequiredService<ILoggerFactory>()
     .CreateLogger("BuggyNotes.App");
 log.LogInformation("App started"); 
