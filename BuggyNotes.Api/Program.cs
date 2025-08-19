@@ -76,7 +76,10 @@ app.UseAuthorization();
 
 var log = app.Services.GetRequiredService<ILoggerFactory>()
     .CreateLogger("BuggyNotes.App");
-log.LogInformation("App started"); 
+log.LogInformation("App started");
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
@@ -141,15 +144,23 @@ app.MapGet("/notes/search-bug", async (AppDb db, string q) =>
     return Results.Ok(list);
 });
 
-app.MapGet("/notes/search-safe", async (AppDb db, string q) =>
+app.MapGet("/notes/search-safe", async (AppDb db, ClaimsPrincipal user, string q) =>
 {
     log.LogInformation("GET /notes/search-safe?q={Q}", q);
-    var list = await db.Notes
-        .Where(n => EF.Functions.Like(n.Title, $"%{q}%"))
-        .ToListAsync();
-    log.LogInformation("SAFE search returned {Count} notes", list.Count);
+    
+    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (userId is null) return Results.Unauthorized();
+if (string.IsNullOrWhiteSpace(q))
+    return Results.Ok(Array.Empty<Note>());
+
+var list = await db.Notes
+    .Where(n => n.OwnerId == userId && EF.Functions.Like(n.Title, $"%{q}%"))
+    .ToListAsync();
+
+log.LogInformation("Safe search returned {Count} notes", list.Count);
     return Results.Ok(list);
-});
+}).RequireAuthorization();
+
 
 app.MapPost("/auth/register", async (AppDb db, RegisterDto dto) =>
 {
