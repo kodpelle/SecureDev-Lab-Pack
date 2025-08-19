@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BuggyNotes.Api.Auth;
+namespace BuggyNotes.Api.Auth
 {
 	public class JwtOptions
 	{
