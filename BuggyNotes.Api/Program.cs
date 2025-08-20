@@ -135,14 +135,20 @@ app.MapGet("/notes/{id:int}-bug", async (AppDb db, int id) =>
     return note is null ? Results.NotFound() : Results.Ok(note);
 });
 
-app.MapGet("/notes/search-bug", async (AppDb db, string q) =>
+//      %' OR 1=1 --     
+app.MapGet("/notes/search-bug", async (AppDb db, ClaimsPrincipal user, string q) =>
 {
-    log.LogWarning("GET /notes/search-bug?q={Q}", q);
-    var sql = $"SELECT * FROM Notes WHERE Title LIKE '%{q}%'";
+    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (userId is null) return Results.Unauthorized();
+
+    var sql = $"SELECT Id, Title, Content, OwnerId " +
+              $"FROM Notes " +
+              $"WHERE OwnerId = '{userId}' AND Title LIKE '%{q}%'";
+
     var list = await db.Notes.FromSqlRaw(sql).ToListAsync();
-    log.LogWarning("BUGGY search returned {Count} notes", list.Count);
     return Results.Ok(list);
-});
+})
+.RequireAuthorization();
 
 app.MapGet("/notes/search-safe", async (AppDb db, ClaimsPrincipal user, string q) =>
 {
