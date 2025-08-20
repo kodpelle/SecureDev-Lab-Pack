@@ -61,10 +61,12 @@
             });
     el('searchSafeOut').textContent = JSON.stringify({status: r.status, json: await r.json() }, null, 2);
         };
-        el('btnSearchBug').onclick = async () => {
-            const r = await fetch(base + '/notes/search-bug?q=' + encodeURIComponent(el('q').value));
-    el('searchBugOut').textContent = JSON.stringify({status: r.status, json: await r.json() }, null, 2);
-        };
+el('btnSearchBug').onclick = async () => {
+    const r = await fetch(base + '/notes/search-bug?q=' + encodeURIComponent(el('q').value), {
+        headers: jwt ? { 'Authorization': 'Bearer ' + jwt } : {}
+    });
+    el('searchBugOut').textContent = JSON.stringify({ status: r.status, json: await r.json() }, null, 2);
+};
 
         // Create notes
         el('btnCreateSafe').onclick = async () => {
