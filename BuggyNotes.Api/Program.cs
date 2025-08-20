@@ -141,29 +141,23 @@ app.MapGet("/notes/search-bug", async (AppDb db, ClaimsPrincipal user, string q)
     var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
     if (userId is null) return Results.Unauthorized();
 
-    var sql = $"SELECT Id, Title, Content, OwnerId " +
-              $"FROM Notes " +
-              $"WHERE OwnerId = '{userId}' AND Title LIKE '%{q}%'";
+    var list = await db.Notes
+        .FromSqlRaw($"SELECT * FROM Notes WHERE OwnerId = '{userId}' AND Title LIKE '%{q}%'")
+        .ToListAsync();
 
-    var list = await db.Notes.FromSqlRaw(sql).ToListAsync();
     return Results.Ok(list);
-})
-.RequireAuthorization();
+}).RequireAuthorization();
 
 app.MapGet("/notes/search-safe", async (AppDb db, ClaimsPrincipal user, string q) =>
 {
-    log.LogInformation("GET /notes/search-safe?q={Q}", q);
-    
     var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
     if (userId is null) return Results.Unauthorized();
-if (string.IsNullOrWhiteSpace(q))
-    return Results.Ok(Array.Empty<Note>());
+    if (string.IsNullOrWhiteSpace(q)) return Results.Ok(Array.Empty<Note>());
 
-var list = await db.Notes
-    .Where(n => n.OwnerId == userId && EF.Functions.Like(n.Title, $"%{q}%"))
-    .ToListAsync();
+    var list = await db.Notes
+        .Where(n => n.OwnerId == userId && EF.Functions.Like(n.Title, $"%{q}%"))
+        .ToListAsync();
 
-log.LogInformation("Safe search returned {Count} notes", list.Count);
     return Results.Ok(list);
 }).RequireAuthorization();
 

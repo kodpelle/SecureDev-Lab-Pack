@@ -102,7 +102,6 @@ el('btnCreateBug').onclick = async () => {
         el('createBugOut').textContent = JSON.stringify(r, null, 2);
     }
 };
-
         // Get notes by id
         el('btnGetSafe').onclick = async () => {
             const id = el('nid').value;
