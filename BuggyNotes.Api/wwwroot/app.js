@@ -69,16 +69,39 @@ el('btnSearchBug').onclick = async () => {
 };
 
         // Create notes
-        el('btnCreateSafe').onclick = async () => {
-            const r = await call('POST', '/notes', {title: el('title').value, content: el('content').value }, true);
-    el('createSafeOut').textContent = JSON.stringify(r, null, 2);
-        };
-        el('btnCreateBug').onclick = async () => {
-            const r = await call('POST', '/notes-bug', {
-        title: el('title').value, content: el('content').value, ownerId: el('owner').value
-            });
-    el('createBugOut').textContent = JSON.stringify(r, null, 2);
-        };
+el('btnCreateSafe').onclick = async () => {
+    const r = await call('POST', '/notes', {
+        title: el('title').value,
+        content: el('content').value
+    }, true);
+
+    if (r.json) {
+        const note = r.json;
+        el('createSafeOut').textContent =
+            `#${note.id} ${note.title}\n${note.content}`;
+    } else {
+        el('createSafeOut').textContent = JSON.stringify(r, null, 2);
+    }
+};
+
+// WARNING uses .innerHTML   ---> open to XSS
+//<img src=x onerror=alert('XSS!')>
+
+el('btnCreateBug').onclick = async () => {
+    const r = await call('POST', '/notes-bug', {
+        title: el('title').value,
+        content: el('content').value,
+        ownerId: el('owner').value
+    });
+
+    if (r.json) {
+        const note = r.json;
+        el('createBugOut').innerHTML =
+            `<h3>${note.title}</h3><p>${note.content}</p>`;
+    } else {
+        el('createBugOut').textContent = JSON.stringify(r, null, 2);
+    }
+};
 
         // Get notes by id
         el('btnGetSafe').onclick = async () => {
