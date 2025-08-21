@@ -7,6 +7,7 @@ using System.Text;
 using BuggyNotes.Api.Auth;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using BuggyNotes.Api.Crypto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Routing;
 
@@ -219,6 +220,29 @@ app.MapGet("/me", (ClaimsPrincipal user) =>
     return Results.Ok(new { id, name });
 })
 .RequireAuthorization();
+
+// AES-GCM (safe)
+app.MapPost("/crypto/aes/gcm/encrypt", (AesEncryptRequest req)
+    => Results.Ok(CryptoService.AesGcmEncrypt(req.Plaintext, req.Base64Key)));
+
+app.MapPost("/crypto/aes/gcm/decrypt", (AesDecryptRequest req)
+    => Results.Ok(CryptoService.AesGcmDecrypt(req.Base64Key, req.Base64Nonce, req.Base64Ciphertext, req.Base64Tag)));
+
+// AES-CBC (bug)
+app.MapPost("/crypto/aes/cbc-bug/encrypt", (AesEncryptRequest req)
+    => Results.Ok(CryptoService.AesCbcInsecureEncrypt(req.Plaintext, req.Base64Key)));
+
+// PBKDF2 (safe)
+app.MapPost("/crypto/hash/pbkdf2", (HashRequest req)
+    => Results.Ok(CryptoService.HashPasswordPbkdf2(req.Password, req.Iterations)));
+
+app.MapPost("/crypto/hash/verify", (VerifyRequest req)
+    => Results.Ok(CryptoService.VerifyPasswordPbkdf2(req.Password, req.HashBase64, req.Iterations)));
+
+// SHA-256 (bug)
+app.MapPost("/crypto/hash/sha256-bug", (HashRequest req)
+    => Results.Ok(CryptoService.HashPasswordSha256(req.Password)));
+
 
 app.MapGet("/__routes", (IEnumerable<EndpointDataSource> sources) =>
 {
