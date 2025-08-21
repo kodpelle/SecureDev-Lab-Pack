@@ -4,8 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>BuggyNotes – Secure vs Insecure demo</title>
-    <link  rel="stylesheet" href="style.css" />
-
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <header>
@@ -79,122 +78,30 @@
                 <div><small class="muted">buggy result</small><pre id="getBugOut"></pre></div>
             </div>
         </section>
-        <!doctype html>
-        <html lang="sv">
-        <head>
-            <meta charset="utf-8" />
-            <meta name="viewport" content="width=device-width,initial-scale=1" />
-            <title>BuggyNotes – Secure vs Insecure demo</title>
-            <link rel="stylesheet" href="style.css" />
 
-        </head>
-        <body>
-            <header>
-                <h1>
-                    BuggyNotes – Secure vs Insecure demo
-                    <span id="jwtStatus" class="pill">JWT: none</span>
-                    <span id="demoMode" class="pill">X-Demo-Mode: ?</span>
-                </h1>
-                <div id="mode" class="small muted">Compare broken vs fixed endpoints side-by-side</div>
-            </header>
-
-            <main>
-                <section class="card">
-                    <h2>Auth</h2>
-                    <div class="row">
-                        <label>Username<br><input id="u" value="alice" /></label>
-                        <label>Password<br><input id="p" type="password" value="P@ssw0rd!" /></label>
-                    </div>
-                    <div class="row">
-                        <button id="btnRegister">Register (safe)</button>
-                        <button id="btnLogin">Login (safe)</button>
-                        <button id="btnLoginBug">Login (BUG)</button>
-                        <button id="btnMe">/me (needs JWT)</button>
-                    </div>
-                    <pre id="authOut"></pre>
-                </section>
-
-                <section class="card">
-                    <h2>Search (SQLi)</h2>
-                    <div class="row">
-                        <label>Query<br><input id="q" value="Hello" /></label>
-                    </div>
-                    <div class="row">
-                        <button id="btnSearchSafe">/notes/search-safe</button>
-                        <button id="btnSearchBug">/notes/search-bug (BUG)</button>
-                    </div>
-                    <div class="split">
-                        <div><small class="muted">safe result</small><pre id="searchSafeOut"></pre></div>
-                        <div><small class="muted">buggy result</small><pre id="searchBugOut"></pre></div>
-                    </div>
-                </section>
-
-                <section class="card">
-                    <h2>Notes – Create</h2>
-                    <div class="row">
-                        <label>Title<br><input id="title" value="my note" /></label>
-                        <label>Content<br><input id="content" value="secret" /></label>
-                        <label>OwnerId (BUG only)<br><input id="owner" value="999" /></label>
-                    </div>
-                    <div class="row">
-                        <button id="btnCreateSafe">POST /notes (safe, needs JWT)</button>
-                        <button id="btnCreateBug">POST /notes-bug (BUG, sets OwnerId freely)</button>
-                    </div>
-                    <div class="split">
-                        <div><small class="muted">safe result</small><pre id="createSafeOut"></pre></div>
-                        <div><small class="muted">buggy result</small><pre id="createBugOut"></pre></div>
-                    </div>
-                </section>
-
-                <section class="card">
-                    <h2>Notes – Get by id</h2>
-                    <div class="row">
-                        <label>Id<br><input id="nid" value="1" /></label>
-                    </div>
-                    <div class="row">
-                        <button id="btnGetSafe">GET /notes/{id} (safe, needs JWT)</button>
-                        <button id="btnGetBug">GET /notes/{id}-bug (BUG, no owner check)</button>
-                    </div>
-                    <div class="split">
-                        <div><small class="muted">safe result</small><pre id="getSafeOut"></pre></div>
-                        <div><small class="muted">buggy result</small><pre id="getBugOut"></pre></div>
-                    </div>
-                </section>
-
-                <footer class="small muted">
-                    Tip: seed first via <code>POST /seed</code> or register/login and create a note.
-                </footer>
-            </main>
-            <section class="card">
-                <h2>Crypto Demo</h2>
-                <div class="row">
-                    <label>Plaintext<br><input id="c_pt" value="hello crypto!" /></label>
-                    <label>Iterations (PBKDF2)<br><input id="c_iter" type="number" value="100000" /></label>
-                </div>
-                <div class="row">
-                    <button id="btnGcmEnc">AES-GCM Encrypt (safe)</button>
-                    <button id="btnGcmDec">AES-GCM Decrypt (safe)</button>
-                    <button id="btnCbcBug">AES-CBC Encrypt (BUG)</button>
-                </div>
-                <div class="row">
-                    <button id="btnPbkdf2">PBKDF2 (safe)</button>
-                    <button id="btnShaBug">SHA-256 (BUG for passwords)</button>
-                    <button id="btnVerify">Verify PBKDF2</button>
-                </div>
-                <pre id="cryptoOut"></pre>
-            </section>
-
-            <script src="app.js" defer></script>
-        </body>
-    </html>
-
+        <section class="card">
+            <h2>Crypto Demo</h2>
+            <div class="row">
+                <label>Plaintext<br><input id="c_pt" value="hello crypto!" /></label>
+                <label>Iterations (PBKDF2)<br><input id="c_iter" type="number" value="100000" /></label>
+            </div>
+            <div class="row">
+                <button id="btnGcmEnc">AES-GCM Encrypt (safe)</button>
+                <button id="btnGcmDec">AES-GCM Decrypt (safe)</button>
+                <button id="btnCbcBug">AES-CBC Encrypt (BUG)</button>
+            </div>
+            <div class="row">
+                <button id="btnPbkdf2">PBKDF2 (safe)</button>
+                <button id="btnShaBug">SHA-256 (BUG for passwords)</button>
+                <button id="btnVerify">Verify PBKDF2</button>
+            </div>
+            <pre id="cryptoOut"></pre>
+        </section>
+    </main>
 
     <footer class="small muted">
         Tip: seed first via <code>POST /seed</code> or register/login and create a note.
     </footer>
-
-    </main>
-
 
     <script src="app.js" defer></script>
 </body>
