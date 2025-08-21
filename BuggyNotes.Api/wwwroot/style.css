@@ -128,3 +128,30 @@ footer {
     grid-template-columns: 1fr 1fr;
     gap: 12px
 }
+.info-btn {
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #e7ecff;
+    background: #1b2a5a;
+    border: 1px solid #3853a3;
+    border-radius: 999px;
+    width: 1.6em;
+    height: 1.6em;
+    line-height: 1.4em;
+    text-align: center;
+    padding: 0;
+}
+
+    .info-btn:hover {
+        filter: brightness(1.1);
+    }
+.infobox {
+    margin-top: 10px;
+    background: #0c1127;
+    border: 1px solid #22316b;
+    border-radius: 10px;
+    padding: 10px 12px;
+    max-width: 640px;
+    line-height: 1.4;
+}

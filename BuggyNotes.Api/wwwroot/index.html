@@ -81,6 +81,18 @@
 
         <section class="card">
             <h2>Crypto Demo</h2>
+            <details class="info-block">
+                <summary>ⓘ What is this?</summary>
+                <div class="infobox">
+                    Demonstrates performance and security aspects of cryptography & hashing.
+                    <ul>
+                        <li><strong>AES-GCM (safe)</strong> – confidentiality + integrity (auth tag).</li>
+                        <li><strong>AES-CBC (BUG)</strong> – fixed IV, no integrity → vulnerable.</li>
+                        <li><strong>PBKDF2 (safe)</strong> – slow, salted password hashing.</li>
+                        <li><strong>SHA-256 (BUG)</strong> – fast, unsalted; unsuitable for passwords.</li>
+                    </ul>
+                </div>
+            </details>
             <div class="row">
                 <label>Plaintext<br><input id="c_pt" value="hello crypto!" /></label>
                 <label>Iterations (PBKDF2)<br><input id="c_iter" type="number" value="100000" /></label>

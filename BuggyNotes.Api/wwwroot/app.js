@@ -185,3 +185,14 @@ el('btnShaBug').onclick = async () => {
         warning: 'SHA-256 alone is fast and unsuitable for passwords (no salt/iterations).'
     });
 };
+
+const infoBtn = document.getElementById('cryptoInfoBtn');
+const infoBox = document.getElementById('cryptoHelp');
+
+if (infoBtn && infoBox) {
+    infoBtn.addEventListener('click', () => {
+        const isHidden = infoBox.hasAttribute('hidden');
+        if (isHidden) infoBox.removeAttribute('hidden'); else infoBox.setAttribute('hidden', '');
+        infoBtn.setAttribute('aria-expanded', String(isHidden));
+    });
+}
