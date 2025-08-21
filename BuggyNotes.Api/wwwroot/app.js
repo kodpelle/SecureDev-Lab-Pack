@@ -112,4 +112,76 @@ el('btnCreateBug').onclick = async () => {
             const id = el('nid').value;
     const r = await call('GET', '/notes/' + id + '-bug');
     el('getBugOut').textContent = JSON.stringify(r, null, 2);
-        };
+};
+const out = (o) => el('cryptoOut').textContent = JSON.stringify(o, null, 2);
+
+// --- CRYPTOGRAPHY ---
+let lastGcm; 
+el('btnGcmEnc').onclick = async () => {
+    const r = await fetch(base + '/crypto/aes/gcm/encrypt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plaintext: el('c_pt').value })
+    });
+    lastGcm = await r.json();
+    out({ status: r.status, gcm: lastGcm });
+};
+el('btnGcmDec').onclick = async () => {
+    if (!lastGcm) return out({ error: 'Encrypt first' });
+    const r = await fetch(base + '/crypto/aes/gcm/decrypt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            base64Key: lastGcm.base64Key,
+            base64Nonce: lastGcm.base64Nonce,
+            base64Ciphertext: lastGcm.base64Ciphertext,
+            base64Tag: lastGcm.base64Tag
+        })
+    });
+    out({ status: r.status, decrypted: await r.json() });
+};
+
+// --- AES-CBC BUG ---
+el('btnCbcBug').onclick = async () => {
+    const r = await fetch(base + '/crypto/aes/cbc-bug/encrypt', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plaintext: el('c_pt').value })
+    });
+    out({
+        status: r.status, cbcBug: await r.json(),
+        note: 'CBC uses fixed IV (all zeros) and has no integrity tag – vulnerable to IV reuse and bit flipping'
+    });
+};
+
+// --- PBKDF2 vs SHA-256 ---
+let lastPbkdf2;
+el('btnPbkdf2').onclick = async () => {
+    const it = parseInt(el('c_iter').value || '100000', 10);
+    const r = await fetch(base + '/crypto/hash/pbkdf2', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: el('c_pt').value, iterations: it })
+    });
+    lastPbkdf2 = await r.json();
+    out({ status: r.status, pbkdf2: lastPbkdf2 });
+};
+el('btnVerify').onclick = async () => {
+    if (!lastPbkdf2) return out({ error: 'Run PBKDF2 first' });
+    const it = parseInt(el('c_iter').value || '100000', 10);
+    const r = await fetch(base + '/crypto/hash/verify', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            password: el('c_pt').value,
+            hashBase64: lastPbkdf2.hashBase64,
+            iterations: it
+        })
+    });
+    out({ status: r.status, verify: await r.json() });
+};
+el('btnShaBug').onclick = async () => {
+    const r = await fetch(base + '/crypto/hash/sha256-bug', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: el('c_pt').value })
+    });
+    out({
+        status: r.status, sha256Bug: await r.json(),
+        warning: 'SHA-256 alone is fast and unsuitable for passwords (no salt/iterations).'
+    });
+};
