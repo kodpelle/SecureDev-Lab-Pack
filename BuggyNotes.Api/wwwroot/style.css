@@ -155,3 +155,28 @@ footer {
     max-width: 640px;
     line-height: 1.4;
 }
+button.warn {
+    border-color: #a37a2e;
+    background: #2b1f0c;
+}
+
+    button.warn:hover {
+        filter: brightness(1.1);
+    }
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    border: 1px solid;
+}
+
+.badge-safe {
+    border-color: #2e8b57;
+    color: #9ff0bf;
+}
+
+.badge-bug {
+    border-color: #a33a3a;
+    color: #ffb3b3;
+}
