@@ -84,22 +84,7 @@ app.UseStaticFiles();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
-// Seed (för att ha något att söka på första gången)
-app.MapPost("/seed", async (AppDb db) =>
-{
-    log.LogInformation("POST /seed called");
-    if (!db.Notes.Any())
-    {
-        db.Notes.AddRange(new[] {
-            new Note { Title = "Hello", Content = "World" },
-            new Note { Title = "Tips", Content = "<b>Bold?</b>" },
-            new Note { Title = "SQL", Content = "LIKE and injection" }
-        });
-        var saved = await db.SaveChangesAsync();
-        log.LogInformation("Seed inserted {Count} notes", saved);
-    }
-    return Results.Ok(new { seeded = true });
-});
+
 
 app.MapPost("/notes", async (AppDb db, ClaimsPrincipal user, Note note) =>
 {
@@ -161,65 +146,6 @@ app.MapGet("/notes/search-safe", async (AppDb db, ClaimsPrincipal user, string q
 
     return Results.Ok(list);
 }).RequireAuthorization();
-
-
-app.MapPost("/auth/register", async (AppDb db, RegisterDto dto) =>
-{
-    var hasher = new PasswordHasher<User>();
-    log.LogInformation("POST /auth/register called {User}", dto.UserName);
-
-    if (await db.Users.AnyAsync(u => u.UserName == dto.UserName))
-    {
-        log.LogWarning("User already exists: {UserName}", dto.UserName);
-        return Results.BadRequest(new { message = "User already exists" });
-    }
-    var user = new User { UserName = dto.UserName };
-
-    user.PasswordHash = hasher.HashPassword(user, dto.Password);
-
-    db.Users.Add(user);
-    await db.SaveChangesAsync();
-
-    return Results.Created($"/users/{user.Id}", new
-    {
-        user.Id,
-        user.UserName,
-        message = "User registered successfully"
-    });
-});
-
-app.MapPost("/auth/login-bug", async (AppDb db, LoginDto dto) =>
-{
-    // varken hash- eller lösenordsverifiering, kräver bara att användaren finns
-    var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
-    if (user is null) return Results.Unauthorized();
-
-    var token = JwtIssuer.CreateToken(user.Id.ToString(), user.UserName, jwtOptions);
-    return Results.Ok(new { token, note = "BUG: password was not verified" });
-});
-app.MapPost("/auth/login", async (AppDb db, LoginDto dto) =>
-{
-    log.LogInformation("POST /auth/login {User}", dto.UserName);
-
-    var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
-    if (user is null) return Results.Unauthorized();
-
-    var hasher = new PasswordHasher<User>();
-    var vr = hasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
-    if (vr == PasswordVerificationResult.Failed) return Results.Unauthorized();
-
-    var token = JwtIssuer.CreateToken(user.Id.ToString(), user.UserName, jwtOptions);
-    return Results.Ok(new { token });
-});
-
-app.MapGet("/me", (ClaimsPrincipal user) =>
-{
-    Console.WriteLine("[DEBUG] /me hit");
-    var id = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? "?";
-    var name = user.Identity?.Name ?? "?";
-    return Results.Ok(new { id, name });
-})
-.RequireAuthorization();
 
 // AES-GCM (safe)
 app.MapPost("/crypto/aes/gcm/encrypt", (AesEncryptRequest req)
