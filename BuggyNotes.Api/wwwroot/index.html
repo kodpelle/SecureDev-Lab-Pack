@@ -10,111 +10,163 @@
     <header>
         <h1>
             BuggyNotes – Secure vs Insecure demo
-            <span id="jwtStatus" class="pill">JWT: none</span>
-            <span id="demoMode" class="pill">X-Demo-Mode: ?</span>
+            <span id="jwtStatus" class="pill">Signed out</span>
+            <span id="demoMode" class="pill">Mode: ?</span>
         </h1>
-        <div id="mode" class="small muted">Compare broken vs fixed endpoints side-by-side</div>
+        <div id="mode" class="small muted">Compare secure vs. insecure behavior side-by-side</div>
     </header>
 
     <main>
+        <!-- AUTH -->
         <section class="card">
-            <h2>Auth</h2>
+            <h2>
+                Authentication
+                <span class="badge badge-safe">safe</span>
+                <span class="badge badge-bug">bug</span>
+            </h2>
+
             <div class="row">
                 <label>Username<br><input id="u" value="alice" /></label>
                 <label>Password<br><input id="p" type="password" value="P@ssw0rd!" /></label>
             </div>
+
             <div class="row">
-                <button id="btnRegister">Register (safe)</button>
-                <button id="btnLogin">Login (safe)</button>
-                <button id="btnLoginBug">Login (BUG)</button>
-                <button id="btnMe">/me (needs JWT)</button>
+                <button id="btnRegister">Create account</button>
+                <button id="btnLogin">Sign in</button>
+                <button id="btnLoginBug" class="warn">Sign in (insecure)</button>
+                <button id="btnMe">Show my profile</button>
             </div>
+
+            <small class="muted">
+                “Insecure” login skips password verification to illustrate a broken auth flow.
+            </small>
+
             <pre id="authOut"></pre>
         </section>
 
+        <!-- SEARCH (SQLi) -->
         <section class="card">
-            <h2>Search (SQLi)</h2>
+            <h2>
+                Search notes (SQL injection)
+                <span class="badge badge-safe">safe</span>
+                <span class="badge badge-bug">bug</span>
+            </h2>
+
             <div class="row">
                 <label>Query<br><input id="q" value="Hello" /></label>
             </div>
+
             <div class="row">
-                <button id="btnSearchSafe">/notes/search-safe</button>
-                <button id="btnSearchBug">/notes/search-bug (BUG)</button>
+                <button id="btnSearchSafe">Search my notes</button>
+                <button id="btnSearchBug" class="warn">Search (insecure)</button>
             </div>
+
+            <p class="small muted">
+                Try a normal word (e.g. <code>Hello</code>). Then try an injection like
+                <code>%' OR 1=1 --</code> in the insecure version.
+            </p>
+
             <div class="split">
-                <div><small class="muted">safe result</small><pre id="searchSafeOut"></pre></div>
-                <div><small class="muted">buggy result</small><pre id="searchBugOut"></pre></div>
+                <div><small class="muted">Secure query (parameterized)</small><pre id="searchSafeOut"></pre></div>
+                <div><small class="muted">Insecure query (SQL injection possible)</small><pre id="searchBugOut"></pre></div>
             </div>
         </section>
 
+        <!-- CREATE NOTE -->
         <section class="card">
-            <h2>Notes – Create</h2>
+            <h2>
+                Create note
+                <span class="badge badge-safe">safe</span>
+                <span class="badge badge-bug">bug</span>
+            </h2>
+
             <div class="row">
                 <label>Title<br><input id="title" value="my note" /></label>
                 <label>Content<br><input id="content" value="secret" /></label>
-                <label>OwnerId (BUG only)<br><input id="owner" value="999" /></label>
+                <label>Owner id (insecure demo)<br><input id="owner" value="999" /></label>
             </div>
+
             <div class="row">
-                <button id="btnCreateSafe">POST /notes (safe, needs JWT)</button>
-                <button id="btnCreateBug">POST /notes-bug (BUG, sets OwnerId freely)</button>
+                <button id="btnCreateSafe">Add note to my account</button>
+                <button id="btnCreateBug" class="warn">Add note (no ownership checks)</button>
             </div>
+
             <div class="split">
-                <div><small class="muted">safe result</small><pre id="createSafeOut"></pre></div>
-                <div><small class="muted">buggy result</small><pre id="createBugOut"></pre></div>
+                <div><small class="muted">Secure render (escaped)</small><pre id="createSafeOut"></pre></div>
+                <div><small class="muted">Insecure render (unescaped – XSS)</small><pre id="createBugOut"></pre></div>
             </div>
         </section>
 
+        <!-- GET BY ID -->
         <section class="card">
-            <h2>Notes – Get by id</h2>
+            <h2>
+                Open note by id
+                <span class="badge badge-safe">safe</span>
+                <span class="badge badge-bug">bug</span>
+            </h2>
+
             <div class="row">
-                <label>Id<br><input id="nid" value="1" /></label>
+                <label>Note id<br><input id="nid" value="1" /></label>
             </div>
+
             <div class="row">
-                <button id="btnGetSafe">GET /notes/{id} (safe, needs JWT)</button>
-                <button id="btnGetBug">GET /notes/{id}-bug (BUG, no owner check)</button>
+                <button id="btnGetSafe">Open note (mine only)</button>
+                <button id="btnGetBug" class="warn">Open note (any id)</button>
             </div>
+
+            <small class="muted">
+                Secure version enforces ownership; insecure version does not.
+            </small>
+
             <div class="split">
-                <div><small class="muted">safe result</small><pre id="getSafeOut"></pre></div>
-                <div><small class="muted">buggy result</small><pre id="getBugOut"></pre></div>
+                <div><small class="muted">Secure result</small><pre id="getSafeOut"></pre></div>
+                <div><small class="muted">Insecure result</small><pre id="getBugOut"></pre></div>
             </div>
         </section>
 
+        <!-- CRYPTO DEMO -->
         <section class="card">
-            <h2>Crypto Demo</h2>
+            <h2>Crypto demo</h2>
+
             <details class="info-block">
                 <summary>ⓘ What is this?</summary>
                 <div class="infobox">
-                    Demonstrates performance and security aspects of cryptography & hashing.
+                    Demonstrates performance and security aspects of cryptography &amp; hashing.
                     <ul>
                         <li><strong>AES-GCM (safe)</strong> – confidentiality + integrity (auth tag).</li>
-                        <li><strong>AES-CBC (BUG)</strong> – fixed IV, no integrity → vulnerable.</li>
+                        <li><strong>AES-CBC (insecure)</strong> – fixed IV, no integrity → vulnerable.</li>
                         <li><strong>PBKDF2 (safe)</strong> – slow, salted password hashing.</li>
-                        <li><strong>SHA-256 (BUG)</strong> – fast, unsalted; unsuitable for passwords.</li>
+                        <li><strong>SHA-256 (insecure)</strong> – fast, unsalted; unsuitable for passwords.</li>
                     </ul>
                 </div>
             </details>
+
             <div class="row">
                 <label>Plaintext<br><input id="c_pt" value="hello crypto!" /></label>
                 <label>Iterations (PBKDF2)<br><input id="c_iter" type="number" value="100000" /></label>
             </div>
+
             <div class="row">
-                <button id="btnGcmEnc">AES-GCM Encrypt (safe)</button>
-                <button id="btnGcmDec">AES-GCM Decrypt (safe)</button>
-                <button id="btnCbcBug">AES-CBC Encrypt (BUG)</button>
+                <button id="btnGcmEnc">AES-GCM: encrypt</button>
+                <button id="btnGcmDec">AES-GCM: decrypt</button>
+                <button id="btnCbcBug" class="warn">AES-CBC: encrypt (insecure)</button>
             </div>
+
             <div class="row">
-                <button id="btnPbkdf2">PBKDF2 (safe)</button>
-                <button id="btnShaBug">SHA-256 (BUG for passwords)</button>
-                <button id="btnVerify">Verify PBKDF2</button>
+                <button id="btnPbkdf2">PBKDF2: hash</button>
+                <button id="btnShaBug" class="warn">SHA-256: hash (insecure)</button>
+                <button id="btnVerify">PBKDF2: verify</button>
             </div>
+
             <pre id="cryptoOut"></pre>
         </section>
     </main>
 
     <footer class="small muted">
-        Tip: seed first via <code>POST /seed</code> or register/login and create a note.
+        Tip: seed first via <code>POST /seed</code> or register/sign in and create a note.
     </footer>
 
-    <script src="app.js" defer></script>
+    <!-- cache-bust the script so browser doesn't keep an old app.js -->
+    <script src="app.js?v=2" defer></script>
 </body>
 </html>
