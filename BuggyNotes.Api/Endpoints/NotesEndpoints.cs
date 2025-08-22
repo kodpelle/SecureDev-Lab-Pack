@@ -40,7 +40,7 @@ public class NotesEndpoints : IEndpoint
 
         bug.MapGet("/{id:int}", async (AppDb db, int id) =>
         {
-            var note = await db.Notes.FindAsync(id);
+            var note = await db.Notes.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
             return note is null ? Results.NotFound() : Results.Ok(note);
         });
 
