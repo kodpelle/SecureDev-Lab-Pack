@@ -108,11 +108,12 @@ el('btnCreateBug').onclick = async () => {
     const r = await call('GET', '/notes/' + id, undefined, true);
     el('getSafeOut').textContent = JSON.stringify(r, null, 2);
         };
-        el('btnGetBug').onclick = async () => {
-            const id = el('nid').value;
-    const r = await call('GET', '/notes/' + id + '-bug');
+el('btnGetBug').onclick = async () => {
+    const id = el('nid').value;
+    const r = await call('GET', '/notes-bug/' + id);
     el('getBugOut').textContent = JSON.stringify(r, null, 2);
 };
+
 const out = (o) => el('cryptoOut').textContent = JSON.stringify(o, null, 2);
 
 // --- CRYPTOGRAPHY ---
