@@ -3,10 +3,11 @@
     let jwt = null;
 
         const el = id => document.getElementById(id);
-        const setJwtStatus = () => {
-        el('jwtStatus').textContent = jwt ? 'JWT: present' : 'JWT: none';
-    el('jwtStatus').className = 'pill ' + (jwt ? 'success' : '');
-        };
+const setJwtStatus = () => {
+    const signed = !!jwt;
+    el('jwtStatus').textContent = signed ? 'Signed in' : 'Signed out';
+    el('jwtStatus').className = 'pill ' + (signed ? 'success' : '');
+};
     setJwtStatus();
 
     async function call(method, path, body, withJwt = false) {
@@ -20,11 +21,11 @@
             });
 
 
-    const demo = res.headers.get('X-Demo-Mode');
-    if (demo) {
-        el('demoMode').textContent = 'X-Demo-Mode: ' + demo;
-    el('demoMode').className = 'pill ' + (demo === 'insecure' ? 'warn' : 'success');
-            }
+        const demo = res.headers.get('X-Demo-Mode');
+        if (demo) {
+            el('demoMode').textContent = 'Mode: ' + (demo === 'insecure' ? 'Insecure' : 'Secure');
+            el('demoMode').className = 'pill ' + (demo === 'insecure' ? 'warn' : 'success');
+        }
 
     const text = await res.text();
     let json;
