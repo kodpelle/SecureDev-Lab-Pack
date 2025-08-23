@@ -11,7 +11,6 @@
         <h1>
             BuggyNotes – Secure vs Insecure demo
             <span id="jwtStatus" class="pill">Signed out</span>
-            <span id="demoMode" class="pill">Mode: ?</span>
         </h1>
         <div id="mode" class="small muted">Compare secure vs. insecure behavior side-by-side</div>
     </header>
@@ -26,8 +25,8 @@
             </h2>
 
             <div class="row">
-                <label>Username<br><input id="u" value="alice" /></label>
-                <label>Password<br><input id="p" type="password" value="P@ssw0rd!" /></label>
+                <label>Username<br><input id="u" value="" /></label>
+                <label>Password<br><input id="p" type="password" value="" /></label>
             </div>
 
             <div class="row">
@@ -161,10 +160,6 @@
             <pre id="cryptoOut"></pre>
         </section>
     </main>
-
-    <footer class="small muted">
-        Tip: seed first via <code>POST /seed</code> or register/sign in and create a note.
-    </footer>
 
     <!-- cache-bust the script so browser doesn't keep an old app.js -->
     <script src="app.js?v=2" defer></script>

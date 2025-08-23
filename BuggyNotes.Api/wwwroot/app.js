@@ -20,13 +20,6 @@ const setJwtStatus = () => {
         body: body ? JSON.stringify(body) : undefined
             });
 
-
-        const demo = res.headers.get('X-Demo-Mode');
-        if (demo) {
-            el('demoMode').textContent = 'Mode: ' + (demo === 'insecure' ? 'Insecure' : 'Secure');
-            el('demoMode').className = 'pill ' + (demo === 'insecure' ? 'warn' : 'success');
-        }
-
     const text = await res.text();
     let json;
     try {json = JSON.parse(text); } catch {json = text; }
