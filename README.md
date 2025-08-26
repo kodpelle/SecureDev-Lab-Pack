@@ -8,4 +8,6 @@ It is intended **for learning purposes only** in the context of developer securi
 
 ![BuggyNotes screenshot](./BuggyNotes.Api/imgs//buggynotessearch.png)
 
-![BuggyNotes screenshot](./BuggyNotes.Api/imgs//buggynotescreate.png)
+![BuggyNotes screenshot](./BuggyNotes.Api/imgs//buggynotesecreate.png)
+
+![BuggyNotes screenshot](./BuggyNotes.Api/imgs//buggynotesgetbyid.png)]
