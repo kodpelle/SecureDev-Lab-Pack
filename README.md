@@ -42,7 +42,7 @@ Secure: /notes/{id} checks that the note belongs to you.
 
 Insecure: /notes-bug/{id} returns any note, regardless of owner.
 
-![BuggyNotes screenshot](./Buggynotes.Api/imgs/buggynotesgetbyid.png)
+![BuggyNotes screenshot](./BuggyNotes.Api/imgs/buggynotesgetbyid.png)
 
 5) Crypto demo
 
