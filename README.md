@@ -67,3 +67,19 @@ Don’t render untrusted HTML. Use textContent/escape, CSP, and avoid .innerHTML
 Password storage: use slow, salted hash (PBKDF2/bcrypt/Argon2). Never plain SHA-256.
 
 JWT secrets: keep out of source; use user-secrets or environment variables.
+
+
+# Quick start
+
+Requirements: .NET 8 SDK, SQLite.
+# from repo root
+cd BuggyNotes.Api
+
+# 1) configure local secrets (JWT)
+dotnet user-secrets init
+
+dotnet user-secrets set "Jwt:Secret" "D3v_Sup3r_Long_Random_Secret_$(New-Guid)"
+# 2) run
+dotnet run
+
+App listens on http://localhost:5015 by default
