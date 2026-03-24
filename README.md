@@ -2,84 +2,97 @@
 BuggyNotes is a minimal demo application that shows **secure vs insecure coding practices** side-by-side.  
 It is intended **for learning purposes only** in the context of developer security training.  
 
-![BuggyNotes screenshot](./BuggyNotes.Api/imgs//buggynotesdemo.jpg)
-1) Authentication
+BuggyNotes is a minimal demo application that shows secure vs insecure coding practices side-by-side.
+It is intended for learning purposes only in the context of developer security training.
 
-Sign in (secure): verifies password hash.
+![BuggyNotes screenshot](./BuggyNotes.Api/imgs/buggynotesdemo.jpg)
 
-Sign in (insecure): skips verification (demonstrates broken auth).
+## What the demo shows
 
-Show my profile: calls /me and requires a valid JWT.
+1. Authentication
 
-![BuggyNotes screenshot](./BuggyNotes.Api/imgs//buggynotesauth.png)
+Sign in (secure): verifies the password hash.
 
-2) Search notes (SQL injection)
+Sign in (insecure): skips password verification.
 
-Secure: /notes/search-safe uses EF parameterization.
+Show my profile: calls `/me` and requires a valid JWT.
 
-Insecure: /notes/search-bug uses FromSqlRaw with string interpolation.
+![Authentication demo](./BuggyNotes.Api/imgs/buggynotesauth.png)
 
-Try normal query (e.g. Hello).
+2. Search notes (SQL injection)
 
-Then try an injection: % or %' OR 1=1 -- (insecure should leak more rows).
+Secure: `/notes/search-safe` uses EF Core parameterization.
 
-![BuggyNotes screenshot](./BuggyNotes.Api/imgs//buggynotessearch.png)
+Insecure: `/notes/search-bug` uses `FromSqlRaw` with string interpolation.
 
-3) Create note (XSS)
+Try a normal query like `Hello`, then try `%` or `%' OR 1=1 --` against the insecure endpoint.
 
-Secure render: server returns JSON; UI writes with textContent.
+![Search demo](./BuggyNotes.Api/imgs/buggynotessearch.png)
 
-Insecure render: UI uses innerHTML → try payloads like:
+3. Create note (XSS)
 
-<img src=x onerror=alert('XSS!')>
+Secure render: server returns JSON and the UI writes with `textContent`.
 
-![BuggyNotes screenshot](./BuggyNotes.Api/imgs/buggynotescreate.png)
+Insecure render: the UI uses `innerHTML`, so a payload like `<img src=x onerror=alert('XSS!')>` will execute.
 
+![Create note demo](./BuggyNotes.Api/imgs/buggynotescreate.png)
 
-4) Open note by id (IDOR / broken object level auth)
+4. Open note by id (IDOR / broken object level auth)
 
-Secure: /notes/{id} checks that the note belongs to you.
+Secure: `/notes/{id}` checks that the note belongs to the signed-in user.
 
-Insecure: /notes-bug/{id} returns any note, regardless of owner.
+Insecure: `/notes-bug/{id}` returns any note regardless of owner.
 
-![BuggyNotes screenshot](./BuggyNotes.Api/imgs/buggynotesgetbyid.png)
+![Get by id demo](./BuggyNotes.Api/imgs/buggynotesgetbyid.png)
 
-5) Crypto demo
+5. Crypto demo
 
-AES-GCM (safe): authenticated encryption (nonce + tag).
+AES-GCM (safe): authenticated encryption with nonce and tag.
 
-AES-CBC (insecure demo): fixed IV, no integrity tag → IV reuse / bit-flipping risk.
+AES-CBC (insecure demo): fixed IV and no integrity tag.
 
-PBKDF2 (safe): salted, iterated hashing; shows time cost.
+PBKDF2 (safe): salted, iterated hashing.
 
-SHA-256 (insecure for passwords): fast, unsalted → weak vs password cracking.
+SHA-256 (insecure for passwords): fast and unsalted.
 
-![BuggyNotes screenshot](./BuggyNotes.Api/imgs/buggynotescrypto.png)
+![Crypto demo](./BuggyNotes.Api/imgs/buggynotescrypto.png)
 
-Security lessons (cheat-sheet)
+## Requirements
 
-Never build SQL with string concatenation. Use parameters / LINQ.
+- .NET 9 SDK or newer
+- Windows PowerShell
 
-Enforce ownership checks on object access (/notes/{id} should verify OwnerId).
+You do not need to install SQLite separately. The app uses a local SQLite database file through EF Core.
 
-Don’t render untrusted HTML. Use textContent/escape, CSP, and avoid .innerHTML.
+## Run locally
 
-Password storage: use slow, salted hash (PBKDF2/bcrypt/Argon2). Never plain SHA-256.
+From the repository root:
 
-JWT secrets: keep out of source; use user-secrets or environment variables.
-
-
-# Quick start
-
-Requirements: .NET 8 SDK, SQLite.
-# from repo root
+```powershell
 cd BuggyNotes.Api
-
-# 1) configure local secrets (JWT)
-dotnet user-secrets init
-
 dotnet user-secrets set "Jwt:Secret" "D3v_Sup3r_Long_Random_Secret_$(New-Guid)"
-# 2) run
 dotnet run
+```
 
-App listens on http://localhost:5015 by default
+The app listens on `http://localhost:5015` by default.
+
+On first run, EF Core migrations are applied automatically and a local SQLite database file named `buggynotes.db` is created in `BuggyNotes.Api/`.
+
+## First-time usage
+
+There is no seeded user in the repository. After the app starts:
+
+1. Open `http://localhost:5015`
+2. Register a user in the Authentication section
+3. Sign in with that same user
+4. Use the token-backed demo features from the UI
+
+## Reset the demo
+
+To start from a clean database, stop the app and delete `BuggyNotes.Api/buggynotes.db`, then run `dotnet run` again.
+
+## Notes
+
+- `Demo:InsecureMode` is enabled in `BuggyNotes.Api/appsettings.json`.
+- You can provide `Jwt:Secret` through an environment variable instead of user-secrets if you prefer.
+- The previous README said `.NET 8` and listed SQLite as a separate prerequisite; both were out of date.
