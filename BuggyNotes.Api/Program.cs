@@ -61,6 +61,12 @@ builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDb>();
+    db.Database.Migrate();
+}
+
 app.Use(async (ctx, next) =>
 {
     ctx.Response.Headers["X-Demo-Mode"] = insecure ? "insecure" : "secure";
